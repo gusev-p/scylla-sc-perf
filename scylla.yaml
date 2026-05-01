@@ -1,0 +1,47 @@
+# Single-node SC perf reproduction config.
+# Mirrors the SCT build #7 (test_id 6a5ab2e4-e7cf-4e0a-bf4e-b19442f0ca03)
+# settings as closely as possible for a 1-node local run.
+
+cluster_name: 'sc-perf-local'
+num_tokens: 256
+
+# All Scylla state (data, commitlog, hints, …) lives under ./data, i.e.
+# the data subfolder of this harness. Edit if you want it elsewhere.
+workdir: ./data
+
+# Single-node setup: this node is its own seed and listens on loopback.
+listen_address: 127.0.0.1
+rpc_address: 127.0.0.1
+broadcast_address: 127.0.0.1
+broadcast_rpc_address: 127.0.0.1
+seed_provider:
+  - class_name: org.apache.cassandra.locator.SimpleSeedProvider
+    parameters:
+      - seeds: 127.0.0.1
+
+# REST API and Prometheus exporter on all interfaces (matches SCT
+# `enable_experimental_sc.yaml` which sets api_address: 0.0.0.0 so the
+# patched cql-stress can query Raft leader info).
+api_address: 0.0.0.0
+api_port: 10000
+prometheus_address: 0.0.0.0
+prometheus_port: 9180
+prometheus_prefix: scylla
+
+# Strong-consistency tables — the actual feature under test.
+# Identical to SCT `enable_experimental_sc.yaml`.
+experimental_features:
+  - strongly-consistent-tables
+
+# Default commitlog policy (periodic 10s). Note: SC writes go through Raft
+# which forces fsync per append regardless of this setting.
+commitlog_sync: periodic
+commitlog_sync_period_in_ms: 10000
+
+# Disable auto snapshot on drop (matches base perf config
+# test-cases/performance/perf-regression-predefined-throughput-steps.yaml).
+auto_snapshot: false
+
+endpoint_snitch: org.apache.cassandra.locator.SimpleSnitch
+
+# Developer mode is set on the command line, not here.

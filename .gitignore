@@ -1,0 +1,11 @@
+# Cloned source trees and build outputs are under user-chosen dirs
+# (see SCYLLA_DIR / CQL_STRESS_DIR in config.sh) — nothing to ignore here.
+
+# Per-host runtime state.
+/data/
+/runs/
+
+# Editor cruft.
+*.swp
+*.swo
+*~
